@@ -1,0 +1,7 @@
+name = "qnyne-stream"
+main = "src/index.ts"
+compatibility_date = "2026-06-21"
+
+[[r2_buckets]]
+binding = "COURSE_BUCKET"
+bucket_name = "qnyne-course-videos"

@@ -1,0 +1,7 @@
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { PlaybackController } from './playback.controller';
+import { PlaybackService } from './playback.service';
+
+@Module({ imports: [JwtModule.register({})], controllers: [PlaybackController], providers: [PlaybackService] })
+export class PlaybackModule {}

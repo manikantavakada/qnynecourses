@@ -1,0 +1,25 @@
+{
+  "name": "@qnyne/video-worker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.840.0",
+    "@prisma/client": "^6.10.1",
+    "bullmq": "^5.56.4",
+    "dotenv": "^16.6.1",
+    "execa": "^9.6.0",
+    "ioredis": "^5.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.34",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
