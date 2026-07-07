@@ -4,7 +4,7 @@ services:
     env: docker
     dockerfilePath: ./apps/api/Dockerfile
     dockerContext: .
-    plan: starter
+    plan: free
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
@@ -50,26 +50,13 @@ services:
       - key: SENTRY_DSN
         sync: false
 
-  - type: worker
-    name: qnyne-video-worker
-    env: docker
-    dockerfilePath: ./apps/video-worker/Dockerfile
-    dockerContext: .
-    plan: starter
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        sync: false
-      - key: STORAGE_ENDPOINT
-        sync: false
-      - key: STORAGE_REGION
-        sync: false
-      - key: STORAGE_ACCESS_KEY_ID
-        sync: false
-      - key: STORAGE_SECRET_ACCESS_KEY
-        sync: false
-      - key: STORAGE_BUCKET_NAME
-        sync: false
+# qnyne-video-worker (Background Worker, apps/video-worker/Dockerfile) is deliberately
+# left out of this Blueprint: Render has no free tier for Background Workers, so
+# deploying it requires a paid plan. Add it manually via the Render dashboard
+# (New -> Background Worker -> same repo -> Dockerfile path apps/video-worker/Dockerfile)
+# once you're ready to pay for it. Until then, uploaded videos will stay stuck in
+# "processing" since nothing consumes the transcode queue.
+#
+# It needs these env vars: NODE_ENV=production, DATABASE_URL, REDIS_URL,
+# STORAGE_ENDPOINT, STORAGE_REGION, STORAGE_ACCESS_KEY_ID,
+# STORAGE_SECRET_ACCESS_KEY, STORAGE_BUCKET_NAME (same values as qnyne-api above).
