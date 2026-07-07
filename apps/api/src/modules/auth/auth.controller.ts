@@ -7,8 +7,20 @@ import { AuthService } from './auth.service';
 import { ForgotPasswordDto, LoginDto, RegisterDto, ResetPasswordDto } from './dto';
 
 const isProd = process.env.NODE_ENV === 'production';
-const accessCookie = { httpOnly: true, sameSite: 'lax' as const, secure: isProd, maxAge: 15 * 60 * 1000 };
-const refreshCookie = { httpOnly: true, sameSite: 'lax' as const, secure: isProd, maxAge: 30 * 24 * 60 * 60 * 1000 };
+// If the web app and API don't share a root domain (e.g. Netlify + Render's default
+// subdomains), the cookie must be SameSite=None to be sent on cross-site requests.
+// Set COOKIE_DOMAIN (e.g. ".qnyne.com") once both are on custom subdomains of the
+// same domain, and SameSite=Lax can be used instead.
+const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
+const crossSite = isProd && !cookieDomain;
+const baseCookie = {
+  httpOnly: true,
+  sameSite: (crossSite ? 'none' : 'lax') as 'none' | 'lax',
+  secure: isProd,
+  domain: cookieDomain,
+};
+const accessCookie = { ...baseCookie, maxAge: 15 * 60 * 1000 };
+const refreshCookie = { ...baseCookie, maxAge: 30 * 24 * 60 * 60 * 1000 };
 
 @Controller('auth')
 export class AuthController {

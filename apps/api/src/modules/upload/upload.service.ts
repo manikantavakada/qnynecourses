@@ -18,11 +18,11 @@ export class UploadService {
     @InjectQueue('video-transcode') private readonly transcodeQueue: Queue,
   ) {
     this.s3 = new S3Client({
-      region: 'auto',
-      endpoint: `https://${config.get<string>('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com`,
+      region: config.get<string>('STORAGE_REGION') ?? 'auto',
+      endpoint: config.getOrThrow<string>('STORAGE_ENDPOINT'),
       credentials: {
-        accessKeyId: config.get<string>('R2_ACCESS_KEY_ID') ?? '',
-        secretAccessKey: config.get<string>('R2_SECRET_ACCESS_KEY') ?? '',
+        accessKeyId: config.get<string>('STORAGE_ACCESS_KEY_ID') ?? '',
+        secretAccessKey: config.get<string>('STORAGE_SECRET_ACCESS_KEY') ?? '',
       },
     });
   }
@@ -81,7 +81,7 @@ export class UploadService {
     return getSignedUrl(
       this.s3,
       new PutObjectCommand({
-        Bucket: this.config.getOrThrow<string>('R2_BUCKET_NAME'),
+        Bucket: this.config.getOrThrow<string>('STORAGE_BUCKET_NAME'),
         Key: key,
         ContentType: contentType,
       }),

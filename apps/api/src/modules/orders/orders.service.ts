@@ -18,6 +18,7 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
     @InjectQueue('email') private readonly emailQueue: Queue<EmailJob>,
+    @InjectQueue('invoices') private readonly invoiceQueue: Queue<{ orderId: string; paymentId: string }>,
   ) {
     this.razorpay = new Razorpay({
       key_id: config.get<string>('RAZORPAY_KEY_ID') || 'rzp_test_missing',
@@ -108,6 +109,7 @@ export class OrdersService {
       courseTitle: order.course.title,
       amount: order.amount,
     });
+    await this.invoiceQueue.add('generate', { orderId: order.id, paymentId: result.payment.id });
     return { verified: true, processed: true, ...result };
   }
 

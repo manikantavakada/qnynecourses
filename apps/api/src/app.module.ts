@@ -17,6 +17,8 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
 import { AuthGlobalModule } from './common/auth/auth-global.module';
 import { HardeningModule } from './modules/hardening/hardening.module';
 import { BlogsModule } from './modules/blogs/blogs.module';
+import { StreamModule } from './modules/stream/stream.module';
+import { HealthController } from './modules/health/health.controller';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { BlogsModule } from './modules/blogs/blogs.module';
     ReviewsModule,
     BlogsModule,
     HardeningModule,
+    StreamModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

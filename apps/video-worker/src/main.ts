@@ -13,11 +13,11 @@ type JobPayload = { videoId: string; courseId: string; sourceKey: string };
 const prisma = new PrismaClient();
 const redis = new IORedis(process.env.REDIS_URL ?? 'redis://localhost:6379', { maxRetriesPerRequest: null });
 const s3 = new S3Client({
-  region: 'auto',
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  region: process.env.STORAGE_REGION ?? 'auto',
+  endpoint: process.env.STORAGE_ENDPOINT,
   credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID ?? '',
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? '',
+    accessKeyId: process.env.STORAGE_ACCESS_KEY_ID ?? '',
+    secretAccessKey: process.env.STORAGE_SECRET_ACCESS_KEY ?? '',
   },
 });
 
@@ -39,7 +39,7 @@ async function uploadDirectory(localDir: string, prefix: string) {
       const relative = fullPath.slice(localDir.length + 1).replace(/\\/g, '/');
       await s3.send(
         new PutObjectCommand({
-          Bucket: process.env.R2_BUCKET_NAME,
+          Bucket: process.env.STORAGE_BUCKET_NAME,
           Key: `${prefix}/${relative}`,
           Body: await readFile(fullPath),
           ContentType: relative.endsWith('.m3u8') ? 'application/vnd.apple.mpegurl' : 'video/mp2t',
@@ -62,7 +62,7 @@ new Worker<JobPayload>(
     await prisma.videoProcessingJob.update({ where: { videoId }, data: { status: 'PROCESSING', progress: 5, startedAt: new Date() } });
 
     try {
-      const source = await s3.send(new GetObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: sourceKey }));
+      const source = await s3.send(new GetObjectCommand({ Bucket: process.env.STORAGE_BUCKET_NAME, Key: sourceKey }));
       await writeFile(sourcePath, await streamToBuffer(source.Body));
       await prisma.videoProcessingJob.update({ where: { videoId }, data: { progress: 20 } });
       await execa('ffmpeg', [
@@ -125,7 +125,7 @@ new Worker<JobPayload>(
 );
 
 new Worker<{ orderId: string; paymentId: string }>(
-  'email',
+  'invoices',
   async (job) => {
     const order = await prisma.order.findUnique({
       where: { id: job.data.orderId },
@@ -145,7 +145,7 @@ new Worker<{ orderId: string; paymentId: string }>(
     const key = `invoices/${order.id}.html`;
     await s3.send(
       new PutObjectCommand({
-        Bucket: process.env.R2_BUCKET_NAME,
+        Bucket: process.env.STORAGE_BUCKET_NAME,
         Key: key,
         Body: invoiceHtml,
         ContentType: 'text/html; charset=utf-8',

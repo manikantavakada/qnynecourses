@@ -44,12 +44,19 @@ export class PlaybackService {
       { sub: userId, courseId: video.module.courseId, videoId },
       { secret: this.config.getOrThrow<string>('VIDEO_TOKEN_SECRET'), expiresIn: expiresInSeconds },
     );
-    const base = this.config.getOrThrow<string>('CF_WORKER_STREAM_URL').replace(/\/$/, '');
+    const base = this.streamBaseUrl();
     return {
-      url: `${base}/courses/${video.module.courseId}/${video.id}/master.m3u8?token=${token}`,
+      url: `${base}/${video.module.courseId}/${video.id}/master.m3u8?token=${token}`,
       token,
       expiresAt: new Date(Date.now() + expiresInSeconds * 1000).toISOString(),
     };
+  }
+
+  private streamBaseUrl() {
+    const cfWorkerUrl = this.config.get<string>('CF_WORKER_STREAM_URL');
+    if (cfWorkerUrl) return `${cfWorkerUrl.replace(/\/$/, '')}/courses`;
+    const apiUrl = this.config.getOrThrow<string>('API_PUBLIC_URL').replace(/\/$/, '');
+    return `${apiUrl}/stream/courses`;
   }
 
   progress(videoId: string, userId: string, watchedSeconds: number, completed: boolean) {
