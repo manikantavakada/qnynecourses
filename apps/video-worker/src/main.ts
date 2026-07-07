@@ -4,7 +4,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { Worker } from 'bullmq';
-import { execa } from 'execa';
+import execa from 'execa';
 import IORedis from 'ioredis';
 import { PrismaClient } from '@prisma/client';
 
