@@ -22,4 +22,5 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: ['/dashboard/:path*', '/my-courses/:path*', '/profile/:path*', '/certificates/:path*', '/admin/:path*'],
+  runtime: 'nodejs',
 };
